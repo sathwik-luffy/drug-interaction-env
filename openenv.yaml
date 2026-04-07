@@ -1,0 +1,22 @@
+name: drug_interaction_env
+version: 0.1.0
+description: A reinforcement learning environment for medical prescription review
+tags:
+  - openenv
+  - healthcare
+  - drug-interactions
+author: dasarisathwik27
+tasks:
+  - name: easy
+    description: Single drug dosage check
+    difficulty: easy
+  - name: medium
+    description: Multi-drug interaction detection
+    difficulty: medium
+  - name: hard
+    description: Complex elderly patient case
+    difficulty: hard
+env_class: DrugInteractionEnvironment
+action_class: DrugInteractionAction
+observation_class: DrugInteractionObservation
+max_steps: 5

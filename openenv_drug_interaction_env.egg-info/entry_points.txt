@@ -1,0 +1,2 @@
+[console_scripts]
+server = drug_interaction_env.server.app:main
