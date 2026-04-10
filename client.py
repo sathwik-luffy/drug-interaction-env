@@ -1,99 +1,56 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
+import requests
+from typing import Optional
+from models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
 
-"""Drug Interaction Env Environment Client."""
-
-from typing import Dict
-
-from openenv.core import EnvClient
-from openenv.core.client_types import StepResult
-from openenv.core.env_server.types import State
-
-from .models import DrugInteractionAction, DrugInteractionObservation
-
-
-class DrugInteractionEnv(
-    EnvClient[DrugInteractionAction, DrugInteractionObservation, State]
-):
+class DrugInteractionEnv:
     """
-    Client for the Drug Interaction Env Environment.
-
-    This client maintains a persistent WebSocket connection to the environment server,
-    enabling efficient multi-step interactions with lower latency.
-    Each client instance has its own dedicated environment session on the server.
-
-    Example:
-        >>> # Connect to a running server
-        >>> with DrugInteractionEnv(base_url="http://localhost:8000") as client:
-        ...     result = client.reset()
-        ...     print(result.observation.echoed_message)
-        ...
-        ...     result = client.step(DrugInteractionAction(message="Hello!"))
-        ...     print(result.observation.echoed_message)
-
-    Example with Docker:
-        >>> # Automatically start container and connect
-        >>> client = DrugInteractionEnv.from_docker_image("drug_interaction_env-env:latest")
-        >>> try:
-        ...     result = client.reset()
-        ...     result = client.step(DrugInteractionAction(message="Test"))
-        ... finally:
-        ...     client.close()
+    Client for the Drug Interaction RL Environment.
+    
+    Usage:
+        env = DrugInteractionEnv(base_url="https://dasarisathwik27-drug-interaction-env.hf.space")
+        obs = env.reset(task_name="easy")
+        obs, reward, done = env.step(DrugInteractionAction(
+            prescription_analysis="This prescription is SAFE...",
+            safety_verdict="SAFE"
+        ))
     """
 
-    def _step_payload(self, action: DrugInteractionAction) -> Dict:
-        """
-        Convert DrugInteractionAction to JSON payload for step message.
+    def __init__(self, base_url: str = "https://dasarisathwik27-drug-interaction-env.hf.space"):
+        self.base_url = base_url.rstrip("/")
+        self.session = requests.Session()
 
-        Args:
-            action: DrugInteractionAction instance
+    def health(self) -> dict:
+        r = self.session.get(f"{self.base_url}/health")
+        r.raise_for_status()
+        return r.json()
 
-        Returns:
-            Dictionary representation suitable for JSON encoding
-        """
-        return {
-            "message": action.message,
-        }
+    def reset(self, task_name: str = "easy") -> DrugInteractionObservation:
+        r = self.session.post(f"{self.base_url}/reset", params={"task_name": task_name})
+        r.raise_for_status()
+        data = r.json()
+        return DrugInteractionObservation(**data["observation"])
 
-    def _parse_result(self, payload: Dict) -> StepResult[DrugInteractionObservation]:
-        """
-        Parse server response into StepResult[DrugInteractionObservation].
-
-        Args:
-            payload: JSON response data from server
-
-        Returns:
-            StepResult with DrugInteractionObservation
-        """
-        obs_data = payload.get("observation", {})
-        observation = DrugInteractionObservation(
-            echoed_message=obs_data.get("echoed_message", ""),
-            message_length=obs_data.get("message_length", 0),
-            done=payload.get("done", False),
-            reward=payload.get("reward"),
-            metadata=obs_data.get("metadata", {}),
+    def step(self, action: DrugInteractionAction):
+        r = self.session.post(
+            f"{self.base_url}/step",
+            json=action.dict(),
+            headers={"Content-Type": "application/json"}
         )
+        r.raise_for_status()
+        data = r.json()
+        obs = DrugInteractionObservation(**data["observation"])
+        reward = data["reward"]
+        done = data["done"]
+        return obs, reward, done
 
-        return StepResult(
-            observation=observation,
-            reward=payload.get("reward"),
-            done=payload.get("done", False),
-        )
+    def state(self) -> DrugInteractionState:
+        r = self.session.get(f"{self.base_url}/state")
+        r.raise_for_status()
+        data = r.json()
+        return DrugInteractionState(**data["state"])
 
-    def _parse_state(self, payload: Dict) -> State:
-        """
-        Parse server response into State object.
+    def __enter__(self):
+        return self
 
-        Args:
-            payload: JSON response from state request
-
-        Returns:
-            State object with episode_id and step_count
-        """
-        return State(
-            episode_id=payload.get("episode_id"),
-            step_count=payload.get("step_count", 0),
-        )
+    def __exit__(self, *args):
+        self.session.close()

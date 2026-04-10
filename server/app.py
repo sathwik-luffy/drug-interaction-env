@@ -1,15 +1,26 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from models import DrugInteractionAction, DrugInteractionObservation
-from server.drug_interaction_env_environment import DrugInteractionEnvironment
 
-app = FastAPI()
+try:
+    from ..models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
+except ImportError:
+    from models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
+
+try:
+    from .drug_interaction_env_environment import DrugInteractionEnvironment
+except ImportError:
+    from server.drug_interaction_env_environment import DrugInteractionEnvironment
+
+app = FastAPI(title="Drug Interaction RL Environment", version="0.2.0")
 env = DrugInteractionEnvironment()
+
+@app.get("/health")
+def health():
+    return {"status": "healthy", "service": "drug-interaction-env", "version": "0.2.0"}
 
 @app.get("/web", response_class=HTMLResponse)
 def web():
-    html = open("/app/env/static/index.html", encoding="utf-8").read()
-    return html
+    return open("static/index.html", encoding="utf-8").read()
 
 @app.post("/reset")
 def reset(task_name: str = "easy"):
@@ -23,13 +34,6 @@ def step(action: DrugInteractionAction):
 
 @app.get("/state")
 def state():
-    t = env.tasks[env.task_name]
-    obs = DrugInteractionObservation(patient_info=t["patient_info"], medications=t["medications"], task_description=t["task_description"], feedback="Current state.", score_breakdown={}, task_name=env.task_name)
-    return {"observation": obs.dict()}
-
-def main():
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=7860)
-
-if __name__ == "__main__":
-    main()
+    if not env.patient:
+        return {"error": "No active episode. Call /reset first."}
+    return {"state": env.state.dict()}

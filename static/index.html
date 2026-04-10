@@ -5,81 +5,189 @@
 <title>Drug Interaction RL Environment</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
-header { background: linear-gradient(135deg, #1a1a3e, #2d2d6b); padding: 24px 40px; border-bottom: 2px solid #4a4aff; }
-header h1 { font-size: 26px; color: #ffffff; letter-spacing: 1px; }
-header p { font-size: 13px; color: #9999cc; margin-top: 4px; }
-.container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-.card { background: #1a1a2e; border: 1px solid #2a2a5a; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-.card h2 { font-size: 16px; color: #7a7aff; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 1px; }
-label { font-size: 13px; color: #9999cc; display: block; margin-bottom: 6px; }
-select { width: 100%; padding: 10px 14px; background: #0f0f1a; border: 1px solid #3a3a7a; border-radius: 8px; color: #e0e0e0; font-size: 14px; margin-bottom: 16px; }
-textarea { width: 100%; padding: 12px 14px; background: #0f0f1a; border: 1px solid #3a3a7a; border-radius: 8px; color: #e0e0e0; font-size: 14px; resize: vertical; min-height: 140px; font-family: inherit; }
-.btn-row { display: flex; gap: 12px; margin-top: 16px; }
-button { padding: 10px 28px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-.btn-reset { background: #2d2d6b; color: #ffffff; border: 1px solid #4a4aff; }
-.btn-reset:hover { background: #4a4aff; }
-.btn-step { background: #4a4aff; color: #ffffff; }
-.btn-step:hover { background: #6a6aff; }
-.response-box { background: #0f0f1a; border: 1px solid #2a2a5a; border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; color: #00ff88; min-height: 100px; white-space: pre-wrap; }
-.reward-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-weight: 700; font-size: 15px; margin-top: 12px; }
-.footer { text-align: center; padding: 24px; font-size: 12px; color: #555577; }
+body { font-family: 'Segoe UI', sans-serif; background: #0a0a1a; color: #e0e0e0; min-height: 100vh; }
+header { background: linear-gradient(135deg, #12122a, #1e1e4a); padding: 28px 40px; border-bottom: 2px solid #5555ff; display: flex; align-items: center; gap: 16px; }
+header h1 { font-size: 24px; color: #fff; letter-spacing: 1px; }
+header p { font-size: 13px; color: #8888cc; margin-top: 4px; }
+.badge { background: #5555ff22; border: 1px solid #5555ff; color: #8888ff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+.container { max-width: 960px; margin: 36px auto; padding: 0 24px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.card { background: #12122a; border: 1px solid #2a2a5a; border-radius: 14px; padding: 24px; }
+.card h2 { font-size: 12px; color: #6666cc; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #2a2a5a; padding-bottom: 10px; }
+label { font-size: 12px; color: #8888aa; display: block; margin-bottom: 6px; margin-top: 12px; }
+select, textarea, input { width: 100%; padding: 10px 14px; background: #0a0a1a; border: 1px solid #3a3a6a; border-radius: 8px; color: #e0e0e0; font-size: 13px; font-family: inherit; outline: none; transition: border 0.2s; }
+select:focus, textarea:focus { border-color: #5555ff; }
+textarea { resize: vertical; min-height: 120px; }
+.btn { padding: 10px 24px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 14px; width: 100%; }
+.btn-primary { background: #5555ff; color: #fff; }
+.btn-primary:hover { background: #7777ff; }
+.btn-secondary { background: #1e1e4a; color: #fff; border: 1px solid #5555ff; }
+.btn-secondary:hover { background: #2a2a6a; }
+.obs-box { background: #0a0a1a; border: 1px solid #2a2a5a; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 12px; color: #00ddaa; min-height: 80px; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
+.reward-bar-wrap { margin-top: 14px; }
+.reward-label { font-size: 12px; color: #8888aa; margin-bottom: 6px; }
+.reward-bar-bg { background: #1a1a3a; border-radius: 20px; height: 12px; overflow: hidden; }
+.reward-bar { height: 12px; border-radius: 20px; transition: width 0.6s ease; background: linear-gradient(90deg, #ff4444, #ffaa00, #00ff88); }
+.reward-value { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.step-indicator { display: flex; gap: 8px; margin-top: 10px; }
+.step-dot { width: 12px; height: 12px; border-radius: 50%; background: #2a2a5a; transition: background 0.3s; }
+.step-dot.done { background: #5555ff; }
+.step-dot.current { background: #00ff88; }
+.tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin: 2px; }
+.tag-safe { background: #00ff8820; color: #00ff88; border: 1px solid #00ff88; }
+.tag-unsafe { background: #ff444420; color: #ff4444; border: 1px solid #ff4444; }
+.tag-info { background: #5555ff20; color: #8888ff; border: 1px solid #5555ff; }
+.full-width { grid-column: 1 / -1; }
+.feedback-box { background: #0a0a1a; border-left: 3px solid #5555ff; border-radius: 0 8px 8px 0; padding: 12px 16px; font-size: 13px; color: #ccccff; margin-top: 10px; display: none; }
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.score-item { background: #0a0a1a; border-radius: 8px; padding: 10px 14px; }
+.score-item .s-label { font-size: 11px; color: #6666aa; }
+.score-item .s-val { font-size: 18px; font-weight: 700; color: #8888ff; }
+.footer { text-align: center; padding: 28px; font-size: 11px; color: #444466; border-top: 1px solid #1a1a3a; margin-top: 40px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>💊 Drug Interaction RL Environment</h1>
-  <p>Reinforcement Learning Environment for Medical Prescription Analysis</p>
+  <div>
+    <h1>💊 Drug Interaction RL Environment</h1>
+    <p>Reinforcement Learning Environment for Medical Prescription Safety Analysis</p>
+  </div>
+  <div style="margin-left:auto">
+    <span class="badge">OpenEnv Hackathon 2026</span>
+  </div>
 </header>
+
 <div class="container">
-  <div class="card">
-    <h2>Step 1 — Select Task & Reset</h2>
-    <label>Difficulty Level</label>
-    <select id="task">
-      <option value="easy">🟢 Easy — Single drug dosage check</option>
-      <option value="medium">🟡 Medium — Multi-drug interaction detection</option>
-      <option value="hard">🔴 Hard — Complex elderly patient case</option>
-    </select>
-    <button class="btn-reset" onclick="reset()">⟳ Reset Environment</button>
-  </div>
-  <div class="card" id="obs-card" style="display:none">
-    <h2>Observation</h2>
-    <div class="response-box" id="obs-box">—</div>
-  </div>
-  <div class="card">
-    <h2>Step 2 — Enter Prescription Analysis</h2>
-    <label>Your Analysis (state SAFE or UNSAFE and explain why)</label>
-    <textarea id="action" placeholder="e.g. This prescription is SAFE. Lisinopril 10mg is within the standard adult dose range of 10-40mg daily..."></textarea>
-    <div class="btn-row">
-      <button class="btn-step" onclick="step()">▶ Submit Step</button>
+  <div class="grid">
+
+    <!-- Left: Controls -->
+    <div>
+      <div class="card">
+        <h2>Episode Setup</h2>
+        <label>Difficulty Level</label>
+        <select id="task">
+          <option value="easy">🟢 Easy — Single drug check</option>
+          <option value="medium">🟡 Medium — Multi-drug interactions</option>
+          <option value="hard">🔴 Hard — Complex elderly patient</option>
+        </select>
+        <button class="btn btn-secondary" onclick="resetEnv()">⟳ Reset Environment</button>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2>Prescription Analysis</h2>
+        <label>Your Analysis</label>
+        <textarea id="action" placeholder="Describe your findings. State SAFE or UNSAFE and explain why. Mention specific drug interactions, allergy violations, or dosage issues found..."></textarea>
+        <label>Safety Verdict</label>
+        <select id="verdict">
+          <option value="UNKNOWN">— Select —</option>
+          <option value="SAFE">✅ SAFE</option>
+          <option value="UNSAFE">⚠️ UNSAFE</option>
+        </select>
+        <button class="btn btn-primary" onclick="stepEnv()">▶ Submit Analysis</button>
+      </div>
     </div>
-  </div>
-  <div class="card" id="result-card" style="display:none">
-    <h2>Result</h2>
-    <div class="response-box" id="result-box">—</div>
-    <div id="reward-badge"></div>
+
+    <!-- Right: Observation + Results -->
+    <div>
+      <div class="card">
+        <h2>Current Observation</h2>
+        <div class="obs-box" id="obs-box">Click "Reset Environment" to begin a new episode...</div>
+        <div class="feedback-box" id="feedback-box"></div>
+      </div>
+
+      <div class="card" style="margin-top:20px">
+        <h2>Episode Results</h2>
+        <div class="reward-bar-wrap">
+          <div class="reward-label">Step Reward</div>
+          <div class="reward-bar-bg"><div class="reward-bar" id="reward-bar" style="width:0%"></div></div>
+          <div class="reward-value" id="reward-value" style="color:#8888ff">—</div>
+        </div>
+        <div class="score-grid" id="score-grid"></div>
+        <div style="margin-top:14px">
+          <div class="reward-label">Episode Progress</div>
+          <div class="step-indicator" id="step-dots"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
-<div class="footer">Drug Interaction RL Environment — OpenEnv Hackathon 2026</div>
+
+<div class="footer">
+  Drug Interaction RL Environment &mdash; Built for Meta PyTorch OpenEnv Hackathon 2026 &mdash; dasarisathwik27
+</div>
+
 <script>
-async function reset() {
+let maxSteps = 3;
+let stepCount = 0;
+
+async function resetEnv() {
   let task = document.getElementById("task").value;
   let r = await fetch("/reset?task_name=" + task, {method: "POST"});
   let d = await r.json();
-  document.getElementById("obs-card").style.display = "block";
-  document.getElementById("obs-box").innerText = JSON.stringify(d.observation, null, 2);
-  document.getElementById("result-card").style.display = "none";
+  let obs = d.observation;
+  maxSteps = obs.max_steps;
+  stepCount = 0;
+  updateObs(obs);
+  document.getElementById("feedback-box").style.display = "none";
+  document.getElementById("reward-value").innerText = "—";
+  document.getElementById("reward-bar").style.width = "0%";
+  document.getElementById("score-grid").innerHTML = "";
+  updateDots(0, maxSteps, false);
 }
-async function step() {
-  let action = document.getElementById("action").value;
-  if (!action.trim()) { alert("Please enter your analysis first!"); return; }
-  let r = await fetch("/step", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({prescription_analysis: action})});
+
+async function stepEnv() {
+  let analysis = document.getElementById("action").value;
+  let verdict = document.getElementById("verdict").value;
+  if (!analysis.trim()) { alert("Please enter your analysis!"); return; }
+  let body = { prescription_analysis: analysis, safety_verdict: verdict, identified_issues: [], confidence_score: 0.8 };
+  let r = await fetch("/step", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
   let d = await r.json();
-  document.getElementById("result-card").style.display = "block";
-  document.getElementById("result-box").innerText = JSON.stringify(d, null, 2);
-  let reward = d.reward;
+  let obs = d.observation;
+  stepCount = obs.step_count;
+  updateObs(obs);
+  updateReward(d.reward);
+  updateScores(obs.score_breakdown);
+  updateDots(stepCount, maxSteps, d.done);
+  let fb = document.getElementById("feedback-box");
+  fb.style.display = "block";
+  fb.innerText = obs.feedback;
+  if (d.done) {
+    fb.innerText += " | Episode complete! Reset to try again.";
+  }
+}
+
+function updateObs(obs) {
+  let txt = "PATIENT\n" + obs.patient_info + "\n\nMEDICATIONS\n" + obs.medications.join("\n") + "\n\nTASK\n" + obs.task_description;
+  if (obs.episode_score > 0) txt += "\n\nEPISODE SCORE: " + obs.episode_score;
+  document.getElementById("obs-box").innerText = txt;
+}
+
+function updateReward(reward) {
+  let pct = Math.round(reward * 100);
+  document.getElementById("reward-bar").style.width = pct + "%";
   let color = reward >= 0.8 ? "#00ff88" : reward >= 0.5 ? "#ffaa00" : "#ff4444";
-  document.getElementById("reward-badge").innerHTML = "<span class='reward-badge' style='background:" + color + "20;color:" + color + ";border:1px solid " + color + "'>Reward: " + reward.toFixed(2) + " / 1.00</span>";
+  document.getElementById("reward-value").innerText = reward.toFixed(2) + " / 1.00";
+  document.getElementById("reward-value").style.color = color;
+}
+
+function updateScores(scores) {
+  let grid = document.getElementById("score-grid");
+  grid.innerHTML = "";
+  for (let [k, v] of Object.entries(scores)) {
+    let label = k.replace(/_/g, " ");
+    let color = v >= 0.3 ? "#00ff88" : v >= 0.1 ? "#ffaa00" : "#ff4444";
+    grid.innerHTML += "<div class='score-item'><div class='s-label'>" + label + "</div><div class='s-val' style='color:" + color + "'>" + v.toFixed(2) + "</div></div>";
+  }
+}
+
+function updateDots(current, max, done) {
+  let dots = document.getElementById("step-dots");
+  dots.innerHTML = "";
+  for (let i = 0; i < max; i++) {
+    let cls = i < current ? "step-dot done" : (i === current && !done ? "step-dot current" : "step-dot");
+    dots.innerHTML += "<div class='" + cls + "'></div>";
+  }
 }
 </script>
 </body>
