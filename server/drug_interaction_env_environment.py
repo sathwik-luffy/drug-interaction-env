@@ -1,5 +1,6 @@
 import random
 import uuid
+from openenv.core.env_server.interfaces import Environment
 
 try:
     from ..models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
@@ -25,7 +26,7 @@ TASK_DESCRIPTIONS = {
     "hard": "Review this complex prescription for an elderly patient with multiple conditions. Identify ALL interactions, contraindications, allergy violations, and dosage issues specific to the patient conditions. State SAFE or UNSAFE with comprehensive clinical reasoning."
 }
 
-class DrugInteractionEnvironment:
+class DrugInteractionEnvironment(Environment):
     def __init__(self):
         self.task_name = "easy"
         self.step_count = 0
@@ -43,7 +44,7 @@ class DrugInteractionEnvironment:
                 f"{p['weight']}kg. Allergies: {p['allergies']}. "
                 f"Conditions: {', '.join(p['conditions'])}.")
 
-    def reset(self, task_name="easy"):
+    def reset(self, task_name="easy", **kwargs):
         self.task_name = task_name
         self.step_count = 0
         self.episode_score = 0.0
@@ -58,25 +59,26 @@ class DrugInteractionEnvironment:
             task_name=task_name,
             step_count=0,
             max_steps=self.max_steps,
-            episode_score=0.0
+            episode_score=0.0,
+            done=False,
+            reward=0.0
         )
 
-    def step(self, action):
+    def step(self, action, **kwargs):
         self.step_count += 1
         p = self.patient
         text = action.prescription_analysis.lower()
         verdict = (action.safety_verdict or "").upper()
         scores = {}
 
-        # 1. Correct safety verdict (0.4 points)
         is_safe_text = "safe" in text and "unsafe" not in text
         is_unsafe_text = "unsafe" in text
+
         if p["safe"]:
             scores["correct_verdict"] = 0.4 if (is_safe_text or verdict == "SAFE") else 0.0
         else:
             scores["correct_verdict"] = 0.4 if (is_unsafe_text or verdict == "UNSAFE") else 0.0
 
-        # 2. Issue detection (0.3 points)
         if not p["issues"]:
             scores["issue_detection"] = 0.3 if scores["correct_verdict"] == 0.4 else 0.0
         else:
@@ -87,11 +89,9 @@ class DrugInteractionEnvironment:
                     detected += 1
             scores["issue_detection"] = round(0.3 * (detected / len(p["issues"])), 2)
 
-        # 3. Explanation quality (0.2 points)
         length = len(action.prescription_analysis)
         scores["explanation_quality"] = 0.2 if length > 150 else (0.1 if length > 60 else 0.0)
 
-        # 4. Medical terminology (0.1 points)
         terms = ["contraindicated", "interaction", "allergy", "allergic", "dosage",
                  "adverse", "therapeutic", "bleeding", "renal", "hepatic",
                  "serotonin", "toxicity", "contraindication", "hypersensitivity"]
@@ -100,7 +100,6 @@ class DrugInteractionEnvironment:
 
         reward = round(min(sum(scores.values()), 1.0), 3)
         self.episode_score = round((self.episode_score * (self.step_count - 1) + reward) / self.step_count, 3)
-
         done = self.step_count >= self.max_steps or (scores["correct_verdict"] == 0.4 and reward >= 0.8)
 
         if scores["correct_verdict"] == 0.4:
@@ -119,8 +118,10 @@ class DrugInteractionEnvironment:
             task_name=self.task_name,
             step_count=self.step_count,
             max_steps=self.max_steps,
-            episode_score=self.episode_score
-        ), reward, done
+            episode_score=self.episode_score,
+            done=done,
+            reward=reward
+        )
 
     @property
     def state(self):
@@ -130,5 +131,6 @@ class DrugInteractionEnvironment:
             max_steps=self.max_steps,
             episode_score=self.episode_score,
             patient_name=self.patient["name"] if self.patient else "none",
-            is_active=self.patient is not None
+            is_active=self.patient is not None,
+            episode_id=self.episode_id or ""
         )

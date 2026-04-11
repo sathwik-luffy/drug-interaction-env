@@ -1,6 +1,6 @@
-openenv-core
 fastapi
 uvicorn
 pydantic
-httpx
+openenv-core
 requests
+openai

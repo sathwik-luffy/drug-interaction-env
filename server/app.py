@@ -25,15 +25,15 @@ def web():
 @app.post("/reset")
 def reset(task_name: str = "easy"):
     obs = env.reset(task_name)
-    return {"observation": obs.dict(), "reward": 0.0, "done": False}
+    return {"observation": obs.model_dump(), "reward": 0.0, "done": False}
 
 @app.post("/step")
 def step(action: DrugInteractionAction):
-    obs, reward, done = env.step(action)
-    return {"observation": obs.dict(), "reward": reward, "done": done}
+    obs = env.step(action)
+    return {"observation": obs.model_dump(), "reward": obs.reward, "done": obs.done}
 
 @app.get("/state")
 def state():
     if not env.patient:
         return {"error": "No active episode. Call /reset first."}
-    return {"state": env.state.dict()}
+    return {"state": env.state.model_dump()}

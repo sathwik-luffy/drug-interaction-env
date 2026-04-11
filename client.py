@@ -1,56 +1,51 @@
-import requests
-from typing import Optional
-from models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
+from openenv.core.env_client import EnvClient
+from openenv.core.client_types import StepResult
+from openenv.core.env_server.types import State
 
-class DrugInteractionEnv:
-    """
-    Client for the Drug Interaction RL Environment.
-    
-    Usage:
-        env = DrugInteractionEnv(base_url="https://dasarisathwik27-drug-interaction-env.hf.space")
-        obs = env.reset(task_name="easy")
-        obs, reward, done = env.step(DrugInteractionAction(
-            prescription_analysis="This prescription is SAFE...",
-            safety_verdict="SAFE"
-        ))
-    """
+try:
+    from .models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
+except ImportError:
+    from models import DrugInteractionAction, DrugInteractionObservation, DrugInteractionState
 
-    def __init__(self, base_url: str = "https://dasarisathwik27-drug-interaction-env.hf.space"):
-        self.base_url = base_url.rstrip("/")
-        self.session = requests.Session()
 
-    def health(self) -> dict:
-        r = self.session.get(f"{self.base_url}/health")
-        r.raise_for_status()
-        return r.json()
+class DrugInteractionEnv(EnvClient[DrugInteractionAction, DrugInteractionObservation, DrugInteractionState]):
 
-    def reset(self, task_name: str = "easy") -> DrugInteractionObservation:
-        r = self.session.post(f"{self.base_url}/reset", params={"task_name": task_name})
-        r.raise_for_status()
-        data = r.json()
-        return DrugInteractionObservation(**data["observation"])
+    def _step_payload(self, action: DrugInteractionAction) -> dict:
+        return {
+            "prescription_analysis": action.prescription_analysis,
+            "identified_issues": action.identified_issues,
+            "safety_verdict": action.safety_verdict,
+            "confidence_score": action.confidence_score,
+        }
 
-    def step(self, action: DrugInteractionAction):
-        r = self.session.post(
-            f"{self.base_url}/step",
-            json=action.dict(),
-            headers={"Content-Type": "application/json"}
+    def _parse_result(self, payload: dict) -> StepResult[DrugInteractionObservation]:
+        obs_data = payload.get("observation", {})
+        obs = DrugInteractionObservation(
+            patient_info=obs_data.get("patient_info", ""),
+            medications=obs_data.get("medications", []),
+            task_description=obs_data.get("task_description", ""),
+            feedback=obs_data.get("feedback", ""),
+            score_breakdown=obs_data.get("score_breakdown", {}),
+            task_name=obs_data.get("task_name", "easy"),
+            step_count=obs_data.get("step_count", 0),
+            max_steps=obs_data.get("max_steps", 3),
+            episode_score=obs_data.get("episode_score", 0.0),
+            done=payload.get("done", False),
+            reward=payload.get("reward", 0.0),
         )
-        r.raise_for_status()
-        data = r.json()
-        obs = DrugInteractionObservation(**data["observation"])
-        reward = data["reward"]
-        done = data["done"]
-        return obs, reward, done
+        return StepResult(
+            observation=obs,
+            reward=payload.get("reward", 0.0),
+            done=payload.get("done", False),
+        )
 
-    def state(self) -> DrugInteractionState:
-        r = self.session.get(f"{self.base_url}/state")
-        r.raise_for_status()
-        data = r.json()
-        return DrugInteractionState(**data["state"])
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.session.close()
+    def _parse_state(self, payload: dict) -> DrugInteractionState:
+        return DrugInteractionState(
+            task_name=payload.get("task_name", "easy"),
+            step_count=payload.get("step_count", 0),
+            max_steps=payload.get("max_steps", 3),
+            episode_score=payload.get("episode_score", 0.0),
+            patient_name=payload.get("patient_name", "none"),
+            is_active=payload.get("is_active", False),
+            episode_id=payload.get("episode_id", ""),
+        )

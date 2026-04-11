@@ -1,27 +1,28 @@
-from pydantic import BaseModel
+from pydantic import Field
 from typing import List, Dict, Optional
+from openenv.core.env_server.types import Action, Observation, State
 
-class DrugInteractionAction(BaseModel):
-    prescription_analysis: str
-    identified_issues: Optional[List[str]] = []
-    safety_verdict: Optional[str] = "UNKNOWN"
-    confidence_score: Optional[float] = 0.5
+class DrugInteractionAction(Action):
+    prescription_analysis: str = Field(..., description="Full text analysis of the prescription")
+    identified_issues: Optional[List[str]] = Field(default=[], description="List of issues found")
+    safety_verdict: Optional[str] = Field(default="UNKNOWN", description="SAFE or UNSAFE")
+    confidence_score: Optional[float] = Field(default=0.5, description="Confidence 0.0 to 1.0")
 
-class DrugInteractionObservation(BaseModel):
-    patient_info: str
-    medications: List[str]
-    task_description: str
-    feedback: str
-    score_breakdown: Dict
-    task_name: str
-    step_count: int
-    max_steps: int
-    episode_score: float
+class DrugInteractionObservation(Observation):
+    patient_info: str = Field(..., description="Patient demographics and conditions")
+    medications: List[str] = Field(..., description="List of prescribed medications")
+    task_description: str = Field(..., description="What the agent needs to do")
+    feedback: str = Field(..., description="Feedback from previous step")
+    score_breakdown: Dict = Field(default={}, description="Detailed scoring breakdown")
+    task_name: str = Field(..., description="easy / medium / hard")
+    step_count: int = Field(default=0, description="Current step number")
+    max_steps: int = Field(default=3, description="Maximum steps per episode")
+    episode_score: float = Field(default=0.0, description="Running episode score")
 
-class DrugInteractionState(BaseModel):
-    task_name: str
-    step_count: int
-    max_steps: int
-    episode_score: float
-    patient_name: str
-    is_active: bool
+class DrugInteractionState(State):
+    task_name: str = Field(default="easy", description="Current task difficulty")
+    step_count: int = Field(default=0, description="Current step number")
+    max_steps: int = Field(default=3, description="Maximum steps per episode")
+    episode_score: float = Field(default=0.0, description="Running episode score")
+    patient_name: str = Field(default="none", description="Current patient name")
+    is_active: bool = Field(default=False, description="Whether episode is active")
