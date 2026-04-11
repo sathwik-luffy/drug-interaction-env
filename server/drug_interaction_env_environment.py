@@ -233,7 +233,7 @@ class DrugInteractionEnvironment(Environment):
         term_count = sum(1 for t in terms if t in text)
         scores["medical_terminology"] = 0.1 if term_count >= 3 else (0.05 if term_count >= 1 else 0.0)
 
-        reward = round(min(sum(scores.values()), 1.0), 3)
+        reward = round(min(max(sum(scores.values()), 0.05), 0.95), 3)
         self.episode_score = round(
             (self.episode_score * (self.step_count - 1) + reward) / self.step_count, 3
         )
