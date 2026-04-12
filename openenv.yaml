@@ -1,22 +1,25 @@
 name: drug_interaction_env
-version: 0.1.0
-description: A reinforcement learning environment for medical prescription review
+version: 0.4.0
+description: A reinforcement learning environment for AI agents to analyze medical prescriptions, detect dangerous drug interactions, allergy violations, and dosage errors.
 tags:
   - openenv
   - healthcare
   - drug-interactions
+  - medical
+  - prescription-analysis
+  - reinforcement-learning
 author: dasarisathwik27
 tasks:
   - name: easy
-    description: Single drug dosage check
+    description: Single drug dosage check for a patient with one condition
     difficulty: easy
   - name: medium
-    description: Multi-drug interaction detection
+    description: Multi-drug interaction detection across 3 medications
     difficulty: medium
   - name: hard
-    description: Complex elderly patient case
+    description: Complex elderly patient case with 6 medications, multiple conditions and allergies
     difficulty: hard
 env_class: DrugInteractionEnvironment
 action_class: DrugInteractionAction
 observation_class: DrugInteractionObservation
-max_steps: 5
+max_steps: 3

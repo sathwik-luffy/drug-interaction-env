@@ -4,3 +4,5 @@ pydantic
 openenv-core
 requests
 openai
+python-multipart
+websockets
