@@ -12,6 +12,9 @@ dependencies = [
     "openai",
 ]
 
+[project.scripts]
+drug-interaction-env = "server.app:main"
+
 [project.entry-points."openenv.envs"]
 drug_interaction_env = "drug_interaction_env"
 
