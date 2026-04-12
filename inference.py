@@ -25,7 +25,7 @@ def run_task(task_name: str) -> float:
         # Reset
         res = requests.post(
             f"{BASE_URL}/reset",
-            params={"task_name": task_name},
+            params={"task_name": task_name,"model_name": MODEL_NAME},
             timeout=30
         )
         res.raise_for_status()
