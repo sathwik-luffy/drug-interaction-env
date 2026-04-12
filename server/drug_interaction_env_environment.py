@@ -1,4 +1,5 @@
 import uuid
+import random
 from openenv.core.env_server.interfaces import Environment
 
 try:
@@ -77,24 +78,33 @@ class DrugInteractionEnvironment(Environment):
             detected = 0
             for issue in p["issues"]:
                 keywords = issue.lower().split()[:4]
-                if any(kw in text for kw in keywords if len(kw) > 3):
+                if sum(1 for kw in keywords if kw in text and len(kw) > 3) >= 2:
                     detected += 1
             scores["issue_detection"] = round(0.3 * (detected / len(p["issues"])), 2)
 
+        meds_mentioned = sum(1 for med in p["medications"] if med.split()[0].lower() in text)
         length = len(action.prescription_analysis)
-        scores["explanation_quality"] = 0.2 if length > 150 else (0.1 if length > 60 else 0.0)
+        if meds_mentioned >= len(p["medications"]) and length > 200:
+            scores["explanation_quality"] = 0.2
+        elif meds_mentioned >= 1 and length > 100:
+            scores["explanation_quality"] = 0.12
+        else:
+            scores["explanation_quality"] = 0.05
 
         terms = ["contraindicated", "interaction", "allergy", "allergic", "dosage",
                  "adverse", "therapeutic", "bleeding", "renal", "hepatic",
-                 "serotonin", "toxicity", "contraindication", "hypersensitivity"]
+                 "serotonin", "toxicity", "contraindication", "hypersensitivity",
+                 "pharmacokinetic", "drug-drug", "side effect", "risk"]
         term_count = sum(1 for t in terms if t in text)
-        scores["medical_terminology"] = 0.1 if term_count >= 3 else (0.05 if term_count >= 1 else 0.0)
+        scores["medical_terminology"] = 0.1 if term_count >= 6 else (0.07 if term_count >= 4 else (0.04 if term_count >= 2 else 0.01))
 
-        reward = round(min(sum(scores.values()), 1.0), 3)
+        raw = sum(scores.values())
+        noise = random.uniform(-0.04, 0.04)
+        reward = round(min(max(raw + noise, 0.01), 0.99), 3)
+
         self.episode_score = round((self.episode_score * (self.step_count - 1) + reward) / self.step_count, 3)
-        done = self.step_count >= self.max_steps or (scores["correct_verdict"] == 0.4 and reward >= 0.8)
+        done = self.step_count >= self.max_steps or (scores["correct_verdict"] == 0.4 and reward >= 0.75)
 
-        # Log to database
         log_step(self.episode_id, self.step_count, action.prescription_analysis, verdict, reward, scores)
         if done:
             complete_episode(self.episode_id, self.step_count, self.episode_score)
