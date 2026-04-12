@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-drug-interaction-env = "server.app:main"
+drug_interaction_env = "server.app:main"
 
 [project.entry-points."openenv.envs"]
 drug_interaction_env = "drug_interaction_env"
