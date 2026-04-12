@@ -151,7 +151,7 @@ class DrugInteractionEnvironment(Environment):
     def __init__(self):
         self.task_name = "easy"
         self.step_count = 0
-        self.max_steps = 3
+        self.max_steps = 1
         self.episode_score = 0.0
         self.patient = None
         self.episode_id = None
@@ -238,7 +238,7 @@ class DrugInteractionEnvironment(Environment):
             (self.episode_score * (self.step_count - 1) + reward) / self.step_count, 3
         )
         done = self.step_count >= self.max_steps or (
-            scores["correct_verdict"] == 0.4 and reward >= 0.8
+            scores["correct_verdict"] == 0.4 and reward >= 0.5
         )
 
         # Build feedback
