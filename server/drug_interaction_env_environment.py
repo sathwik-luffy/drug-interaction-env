@@ -35,12 +35,14 @@ class DrugInteractionEnvironment(Environment):
                 f"{p['weight']}kg. Allergies: {p['allergies']}. "
                 f"Conditions: {', '.join(p['conditions'])}.")
 
-    def reset(self, task_name="easy", model_name="unknown", **kwargs):
+    def reset(self, task_name="easy", model_name="unknown", seed=None, **kwargs):
         self.task_name = task_name
         self.step_count = 0
         self.episode_score = 0.0
         self.episode_id = str(uuid.uuid4())[:8]
         self.model_name = model_name
+        if seed is not None:
+            random.seed(seed)
         self.patient = get_random_patient(task_name)
         log_episode(self.episode_id, task_name, self.patient["name"], model_name)
         return DrugInteractionObservation(
