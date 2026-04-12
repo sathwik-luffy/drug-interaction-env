@@ -48,3 +48,10 @@ def leaderboard():
 @app.get("/history")
 def history():
     return {"episodes": get_episode_history(limit=20)}
+
+def main():
+    import uvicorn
+    uvicorn.run("server.app:app", host="0.0.0.0", port=7860, reload=False)
+
+if __name__ == "__main__":
+    main()
