@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+with open("server/app.py", "w", encoding="utf-8") as f:
+    f.write('''from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 try:
@@ -48,3 +49,5 @@ def leaderboard():
 @app.get("/history")
 def history():
     return {"episodes": get_episode_history(limit=20)}
+''')
+print("app.py done!")

@@ -1,4 +1,5 @@
-import uuid
+with open("server/drug_interaction_env_environment.py", "w", encoding="utf-8") as f:
+    f.write('''import uuid
 from openenv.core.env_server.interfaces import Environment
 
 try:
@@ -30,9 +31,9 @@ class DrugInteractionEnvironment(Environment):
         self.model_name = "unknown"
 
     def _build_patient_info(self, p):
-        return (f"Patient: {p['name']}, {p['gender']}, {p['age']} years old, "
-                f"{p['weight']}kg. Allergies: {p['allergies']}. "
-                f"Conditions: {', '.join(p['conditions'])}.")
+        return (f"Patient: {p[\'name\']}, {p[\'gender\']}, {p[\'age\']} years old, "
+                f"{p[\'weight\']}kg. Allergies: {p[\'allergies\']}. "
+                f"Conditions: {\', \'.join(p[\'conditions\'])}.")
 
     def reset(self, task_name="easy", model_name="unknown", **kwargs):
         self.task_name = task_name
@@ -101,11 +102,11 @@ class DrugInteractionEnvironment(Environment):
             update_leaderboard(self.model_name, self.task_name, self.episode_score, self.episode_id)
 
         if scores["correct_verdict"] == 0.4:
-            fb = f"Correct! This prescription is {'SAFE' if p['safe'] else 'UNSAFE'}."
+            fb = f"Correct! This prescription is {\'SAFE\' if p[\'safe\'] else \'UNSAFE\'}."
         else:
-            fb = f"Incorrect. This prescription is {'SAFE' if p['safe'] else 'UNSAFE'}."
+            fb = f"Incorrect. This prescription is {\'SAFE\' if p[\'safe\'] else \'UNSAFE\'}."
         if p["issues"]:
-            fb += f" Key issues: {'; '.join(p['issues'][:2])}."
+            fb += f" Key issues: {\'; \'.join(p[\'issues\'][:2])}."
 
         return DrugInteractionObservation(
             patient_info=self._build_patient_info(p),
@@ -132,3 +133,5 @@ class DrugInteractionEnvironment(Environment):
             is_active=self.patient is not None,
             episode_id=self.episode_id or ""
         )
+''')
+print("environment done!")
