@@ -18,6 +18,8 @@ class DrugInteractionObservation(Observation):
     step_count: int = Field(default=0, description="Current step number")
     max_steps: int = Field(default=3, description="Maximum steps per episode")
     episode_score: float = Field(default=0.0, description="Running episode score")
+    done: bool = Field(default=False, description="Whether episode is done")
+    reward: float = Field(default=0.0, description="Step reward")
 
 class DrugInteractionState(State):
     task_name: str = Field(default="easy", description="Current task difficulty")
@@ -26,3 +28,4 @@ class DrugInteractionState(State):
     episode_score: float = Field(default=0.0, description="Running episode score")
     patient_name: str = Field(default="none", description="Current patient name")
     is_active: bool = Field(default=False, description="Whether episode is active")
+    episode_id: str = Field(default="", description="Current episode ID")
