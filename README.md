@@ -144,10 +144,10 @@ Each `reset()` call randomly selects a patient from the appropriate difficulty p
 
 | Task | Model | Score |
 |------|-------|-------|
-| Easy | Qwen2.5-72B | 1.000 |
-| Medium | Qwen2.5-72B | 1.000 |
-| Hard | Qwen2.5-72B | 1.000 |
-| **Average** | | **1.000** |
+| Easy | Qwen2.5-72B | 0.950 |
+| Medium | Qwen2.5-72B | 0.950 |
+| Hard | Qwen2.5-72B | 0.950 |
+| **Average** | | **0.950** |
 
 ---
 
