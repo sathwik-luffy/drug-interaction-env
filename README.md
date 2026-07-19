@@ -2,7 +2,7 @@
 
 An OpenEnv-compliant Reinforcement Learning environment for training AI agents to analyze medical prescriptions and detect dangerous drug interactions.
 
-## 🏥 Overview
+##  Overview
 
 This environment simulates a clinical prescription review task where an AI agent must:
 - Identify dangerous drug-drug interactions
@@ -10,7 +10,7 @@ This environment simulates a clinical prescription review task where an AI agent
 - Flag dosage errors and contraindications
 - Provide clinical reasoning for its assessment
 
-## 🎯 Tasks
+##  Tasks
 
 | Difficulty | Description | Example |
 |------------|-------------|---------|
@@ -18,7 +18,7 @@ This environment simulates a clinical prescription review task where an AI agent
 | 🟡 Medium | Multi-drug interaction detection | Warfarin + Aspirin + Sertraline |
 | 🔴 Hard | Complex elderly patient case | 6 medications with kidney disease + allergy |
 
-## 📐 Action Space
+##  Action Space
 
 ```python
 class DrugInteractionAction(Action):
@@ -28,7 +28,7 @@ class DrugInteractionAction(Action):
     confidence_score: float       # Confidence 0.0 to 1.0
 ```
 
-## 👁️ Observation Space
+##  Observation Space
 
 ```python
 class DrugInteractionObservation(Observation):
@@ -56,7 +56,7 @@ Rewards are strictly between 0.01 and 0.99, computed from 4 components:
 | Explanation Quality | 0.20 | Depth and completeness of analysis |
 | Medical Terminology | 0.10 | Use of clinical language |
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Run with Docker
 ```bash
@@ -78,7 +78,7 @@ export MODEL_NAME=Qwen/Qwen2.5-72B-Instruct
 python inference.py
 ```
 
-## 🔌 API Endpoints
+##  API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -91,7 +91,7 @@ python inference.py
 | `/web` | GET | Interactive web UI |
 | `/ws` | WebSocket | Real-time interaction |
 
-## 📊 Baseline Results
+##  Baseline Results
 
 | Task | Model | Score |
 |------|-------|-------|
@@ -100,4 +100,4 @@ python inference.py
 | Hard | Qwen2.5-72B | 0.595 |
 | **Average** | | **0.858** |
 
-## 🏗️ Environment Structure
+##  Environment Structure
