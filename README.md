@@ -5,7 +5,7 @@ An OpenEnv-compliant Reinforcement Learning environment for training AI agents t
 ##  Overview
 
 This environment simulates a clinical prescription review task where an AI agent must:
-- Identify dangerous drug-drug interactions
+- Identify dangerous drug-drug interactions 
 - Detect allergy violations
 - Flag dosage errors and contraindications
 - Provide clinical reasoning for its assessment
